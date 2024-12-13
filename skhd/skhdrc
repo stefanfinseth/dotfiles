@@ -1,0 +1,96 @@
+#SKHD STUFF
+
+# if you're having troubles finding key codes for a key just type skhd --observe in a terminal and type a key. Pretty cool! Or just check the wiki.
+
+## HYPER == SHIFT + CMD + ALT + OPTION
+
+## Quickly restart the yabai launch agent
+ctrl + alt + cmd - r : yabai --restart-service
+
+## open terminal
+hyper - return : /Applications/Hyper.app/Contents/MacOS/Hyper
+
+## toggle window fullscreen zoom
+hyper - f : yabai -m window --toggle zoom-fullscreen
+
+# swap displays
+hyper - 1 : yabai -m display --focus 1
+hyper - 2 : yabai -m display --focus 2
+hyper - 3 : yabai -m display --focus 3
+
+# move window to other displays
+cmd + shift - 1 : yabai -m window --display 1 && yabai -m display --focus 1
+cmd + shift - 2 : yabai -m window --display 2 && yabai -m display --focus 2
+cmd + shift - 3 : yabai -m window --display 3 && yabai -m display --focus 3
+
+# focus Slack and open "jump to"
+# shift + cmd - space : yabai -m window --focus $(yabai -m query --windows | jq '.[] | select(.app=="Slack") | .id') | skhd --key "cmd - k"
+
+# focus window
+hyper - x : yabai -m window --focus recent
+hyper - h : yabai -m window --focus west || yabai -m display --focus west
+hyper - j : yabai -m window --focus south || yabai -m display --focus south
+hyper - k : yabai -m window --focus north || yabai -m display --focus north
+hyper - l : yabai -m window --focus east || yabai -m display --focus east
+hyper - i : yabai -m window --focus stack.prev
+hyper - o : yabai -m window --focus stack.next
+
+
+# swap window
+shift + alt - x : yabai -m window --swap recent
+shift + alt - h : yabai -m window --swap west
+shift + alt - j : yabai -m window --swap south
+shift + alt - k : yabai -m window --swap north
+shift + alt - l : yabai -m window --swap east
+
+# Add the active window to the window or stack to the {direction}
+# Note that this only works when the active window does *not* already belong to a stack
+hyper - left  : yabai -m window west --stack $(yabai -m query --windows --window | jq -r '.id')
+hyper - down  : yabai -m window south --stack $(yabai -m query --windows --window | jq -r '.id')
+hyper - up    : yabai -m window north --stack $(yabai -m query --windows --window | jq -r '.id')
+hyper - right : yabai -m window east --stack $(yabai -m query --windows --window | jq -r '.id')
+
+# move window
+shift + cmd - h : yabai -m window --warp west || (yabai -m window --display west && yabai -m display --focus west)
+shift + cmd - j : yabai -m window --warp south || (yabai -m window --display south && yabai -m display --focus south)
+shift + cmd - k : yabai -m window --warp north || (yabai -m window --display north && yabai -m display --focus north)
+shift + cmd - l : yabai -m window --warp east || (yabai -m window --display east && yabai -m display --focus east)
+
+# balance size of windows
+shift + alt - 0 : yabai -m space --balance
+
+# increase window size
+shift + cmd - a : yabai -m window --resize left:-20:0
+shift + cmd - s : yabai -m window --resize bottom:0:20
+shift + cmd - d : yabai -m window --resize top:0:-20
+shift + cmd - f : yabai -m window --resize right:20:0
+
+# decrease window size
+shift + alt - a : yabai -m window --resize left:20:0
+shift + alt - s : yabai -m window --resize bottom:0:-20
+shift + alt - d : yabai -m window --resize top:0:20
+shift + alt - f : yabai -m window --resize right:-20:0
+
+# rotate tree
+hyper - r : yabai -m space --rotate 90
+
+# mirror tree y-axis
+alt - y : yabai -m space --mirror y-axis
+
+# mirror tree x-axis
+alt - x : yabai -m space --mirror x-axis
+
+# toggle window parent zoom
+alt - d : yabai -m window --toggle zoom-parent
+
+# toggle window split type
+hyper - e : yabai -m window --toggle split
+
+# float / unfloat window and restore position
+# alt - t : yabai -m window --toggle float && /tmp/yabai-restore/$(yabai -m query --windows --window | jq -re '.id').restore 2>/dev/null || true
+alt - t : yabai -m window --toggle float && yabai -m window --grid 4:4:1:1:2:2
+
+# Moving laptop screen around via Hammerspoon to accomodate layouts
+cmd + alt - left  : hs -c "hs.screen.allScreens()[2]:setOrigin(0,484)"
+cmd + alt - down  : hs -c "hs.screen.allScreens()[2]:setOrigin(985,1440)"
+cmd + alt - right : hs -c "hs.screen.allScreens()[2]:setOrigin(3440,484)"
