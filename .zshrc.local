@@ -1,0 +1,109 @@
+export HOMEBREW_NO_ENV_HINTS=1
+
+export KUBE_EDITOR="code -w"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/stefanfinseth/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/stefanfinseth/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/stefanfinseth/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/stefanfinseth/google-cloud-sdk/completion.zsh.inc'; fi
+
+## Ensure HashiCorp Vault knows to run through localhost
+export VAULT_ADDR=localhost:8200
+
+## Ensure that GPG knows to read input from tty
+export GPG_TTY=$(tty)
+unset SSH_AGENT_PID
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+
+# various aliases
+alias py='python3'
+alias b64='base64'
+alias grep='ugrep'
+alias fgrep='ugrep'
+alias egrep='ugrep'
+alias lz='lazydocker'
+alias cat='bat'
+
+# gpg aliases
+secret () {
+        output=~/"${1}".$(date +%s).enc
+        gpg --encrypt --armor --output ${output} -r 0x0000 -r 0x0001 -r 0x0002 "${1}" && echo "${1} -> ${output}"
+}
+
+reveal () {
+        output=$(echo "${1}" | rev | cut -c16- | rev)
+        gpg --decrypt --output ${output} "${1}" && echo "${1} -> ${output}"
+}
+
+# git aliases
+alias g='git'
+alias gd='git diff'
+alias ga='git add -p'
+alias gst='git status -s'
+alias gl='git pull'
+alias gp='git push'
+alias gb='git branch'
+alias gs='git switch'
+alias gsn='git switch -c'
+alias ghist='git log --pretty=format:"%C(auto,blue)%h%C(auto,reset)%x09%C(auto,red)%an%C(auto,reset)%x09%C(auto,green)%ad%C(auto,reset)%x09%C(auto,yellow)%s%C(auto,reset)"'
+
+# sre aliases
+alias tf='terraform'
+alias vaultfwd='k port-forward svc/vault-ui 8200:8200 --namespace vault --context spinnaker'
+alias gc='gcloud'
+
+# sql-server iap aliases
+winpwreset() {
+    envs=(f1 f2 f3 f5 internal plex titanic placebo frappe staging)
+    if (($envs[(Ie)$1])); then
+        gcloud beta compute reset-windows-password sql-server-$1 --zone europe-west4-a --project stage-econo-cm --quiet
+    else
+	gcloud beta compute reset-windows-password $1 --zone europe-west4-a --project stage-econo-cm --quiet
+    fi
+}
+wintnl() {
+    envs=(f1 f2 f3 plex internal f5 frappe titanic f9 doppio placebo staging)
+    projects=(dev, stage, prod)
+    project="none"
+    if [ -z $2 ]
+    then
+        project="stage-econo-cm"
+        echo "no project set - using staging"
+    else
+        if [ $projects[(Ie)$2] ]
+        then
+            project="${2}-econo-cm"
+        else
+            echo "Unknown project"
+            return 1
+        fi
+    fi
+
+    if (($envs[(Ie)$1]))
+    then
+        gcloud beta compute reset-windows-password sql-server-$1 --zone europe-west4-b --project $project --quiet \
+            | grep password: | cut -d ' ' -f 2| tr -d '\n' | pbcopy &> /dev/null
+        gcloud compute start-iap-tunnel sql-server-$1 3389 --project $project --zone europe-west4-a --local-host-port=localhost:3389
+    else
+        gcloud beta compute reset-windows-password $1 --zone europe-west4-b --project $project --quiet \
+            | grep password: | cut -d ' ' -f 2| tr -d '\n' | pbcopy &> /dev/null
+        gcloud compute start-iap-tunnel $1 3389 --project $project --zone europe-west4-b --local-host-port=localhost:3389
+    fi
+}
+
+# Kubectl stuff
+alias k='kubectl'
+complete -o default -F __start_kubectl k
+
+# ngrok autocomplete
+if command -v ngrok &>/dev/null; then
+    eval "$(ngrok completion)"
+fi
+
+
+clear
+
+
+export PATH="$HOME/src/git-custom-commands:$PATH"
+
